@@ -21,7 +21,6 @@ from datetime import datetime
 import random
 from sklearn.utils import shuffle
 from typing import Dict, List, Optional, Set, Callable
-
 import string
 from tensorflow.keras.utils import get_file
 from nltk.corpus import stopwords
@@ -46,7 +45,7 @@ from io import StringIO
 from tensorflow.keras.optimizers import Adam
 import ast
 import tensorflow_datasets as tfds
-from transformers import AutoTokenizer, TFGPT2Model, GPT2Tokenizer
+from transformers import AutoTokenizer, TFGPT2Model, GPT2Tokenizer, AutoModel
 import requests
 import zipfile
 import tempfile
