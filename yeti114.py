@@ -256,6 +256,7 @@ class TextProcessor:
         self.tokenizer = None
         self.embedding_matrix = None
         self.vocab_size = 0
+        self.model = None
         self.processed_texts = []
         self.log_dir = log_dir
         self.glove_model = None
