@@ -21,6 +21,7 @@ from datetime import datetime
 import random
 from sklearn.utils import shuffle
 from typing import Dict, List, Optional, Set, Callable
+
 import string
 from tensorflow.keras.utils import get_file
 from nltk.corpus import stopwords
@@ -51,8 +52,8 @@ import zipfile
 import tempfile
 
 
-os.environ['CUDA_VISIBLE_DEVICES'] = '-1'
-os.environ['PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION'] = 'python3'
+#os.environ['CUDA_VISIBLE_DEVICES'] = '-1'
+#os.environ['PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION'] = 'python3'
 gpus = tf.config.list_physical_devices("GPU")
 if gpus:
     try:
@@ -268,7 +269,7 @@ class TextProcessor:
             raise ValueError("Lista tekstów jest pusta lub None.")
 
         # Inicjalizacja tokenizera z domyślnymi tokenami GPT-2
-        self.tokenizer = AutoTokenizer.from_pretrained("openai-community/gpt2-xl")
+        self.tokenizer = AutoTokenizer.from_pretrained("openai-community/gpt2-xl", use_auth_token='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')
 
         # Dodanie dodatkowego tokena paddingu
         self.tokenizer.add_special_tokens({'pad_token': '[PAD]'})
@@ -333,8 +334,8 @@ class TextProcessor:
 
     def load_gpt2_model(self):
         try:
-            self.gpt2_tokenizer = GPT2Tokenizer.from_pretrained("gpt2-medium")
-            self.gpt2_model = TFGPT2Model.from_pretrained("gpt2-medium")
+            self.gpt2_model = AutoModel.from_pretrained(self.model_name, use_auth_token='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')
+            self.gpt2_tokenizer = AutoTokenizer.from_pretrained(self.model_name, use_auth_token='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')
             print("Standardowy model GPT-2 załadowany pomyślnie.")
         except Exception as e:
             print(f"Błąd podczas wczytywania standardowego modelu GPT-2: {e}")
@@ -361,13 +362,8 @@ class TextProcessor:
     def PrepareTextData(self, text_data, tokenizer, sequence_length):
         """
         Przygotowuje dane tekstowe dla modelu.
-
-        :param text_data: Lista surowego tekstu do przetworzenia.
-        :param tokenizer: Tokenizer używany do konwersji tekstu na sekwencje.
-        :param sequence_length: Długość sekwencji do użycia w modelu.
-        :return: Przetworzone sekwencje.
         """
-        # Sprawdzenie, czy dane tekstowe nie są puste
+        # Zmodyfikowane sprawdzenie, czy tekst wejściowy nie jest pusty
         if text_data is None:
             raise ValueError("Tekst wejściowy jest None")
         if isinstance(text_data, np.ndarray) and text_data.size == 0:
@@ -375,13 +371,10 @@ class TextProcessor:
         if isinstance(text_data, list) and not text_data:
             raise ValueError("Tekst wejściowy jest pustą listą")
 
-        # Sprawdzenie, czy tokenizer został prawidłowo przekazany
-        if tokenizer is None:
-            raise ValueError("Tokenizer jest None. Proszę przekazać poprawny tokenizer.")
-
         sequences = []
         for text in text_data:
-            if text:
+            # Upewnij się, że tekst nie jest pusty
+            if isinstance(text, str) and text:
                 try:
                     encoded_text = tokenizer.encode(str(text), add_special_tokens=True)
                     # Uzupełnianie do długości sequence_length
@@ -392,13 +385,7 @@ class TextProcessor:
                     print(f"Błąd podczas kodowania tekstu: {e}")
                     continue
 
-        if not sequences:
-            print("Nie udało się utworzyć żadnych sekwencji.")
-            raise ValueError("Nie udało się utworzyć żadnych sekwencji z podanych danych.")
-
-        sequences_padded = pad_sequences(sequences, maxlen=sequence_length, padding="post")
-        return sequences_padded
-
+        return sequences
 
 
     def preprocess_text(self, text):
